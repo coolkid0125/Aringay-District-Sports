@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UNIT IV MEET - Medal Tally & Standings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .tab-active { color: #1e3a8a; border-bottom: 3px solid #2563eb; background-color: #eff6ff; }
+    .touch-scroll { -webkit-overflow-scrolling: touch; }
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.92; }
+    }
+    .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- ============================================== -->
+  <!-- FULLSCREEN INSTANT LOADING SCREEN (METHOD 1)   -->
+  <!-- ============================================== -->
+  <div id="app-loader" class="fixed inset-0 z-50 bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out">
+    <div class="max-w-md w-full text-center flex flex-col items-center space-y-5 sm:space-y-6">
+      <div>
+        <span class="px-3 py-1 bg-yellow-400/20 border border-yellow-400/40 text-yellow-300 font-extrabold text-[10px] sm:text-xs rounded-full uppercase tracking-widest inline-flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-medal text-yellow-400"></i> DepEd Athletic Association
+        </span>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-wider uppercase mt-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-yellow-200">
+          UNIT IV MEET
+        </h1>
+        <p class="text-xs text-blue-300 font-medium">Official Medal Tally & Standings</p>
+      </div>
+
+      <!-- 4 Instant Logos Row -->
+      <div class="relative py-2">
+        <div class="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+        <div id="loader-logos-row" class="relative flex items-center justify-center gap-3 sm:gap-4">
+          <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-white p-0.5 border-2 border-yellow-400 shadow-xl overflow-hidden flex-shrink-0 animate-pulse-slow">
+            <img id="preload-logo-0" src="" alt="Unit 1" class="w-full h-full object-cover rounded-full bg-slate-100" onerror="handlePreloadError(0)">
+          </div>
+          <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-white p-0.5 border-2 border-yellow-400 shadow-xl overflow-hidden flex-shrink-0 animate-pulse-slow" style="animation-delay: 0.2s;">
+            <img id="preload-logo-1" src="" alt="Unit 2" class="w-full h-full object-cover rounded-full bg-slate-100" onerror="handlePreloadError(1)">
+          </div>
+          <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-white p-0.5 border-2 border-yellow-400 shadow-xl overflow-hidden flex-shrink-0 animate-pulse-slow" style="animation-delay: 0.4s;">
+            <img id="preload-logo-2" src="" alt="Unit 3" class="w-full h-full object-cover rounded-full bg-slate-100" onerror="handlePreloadError(2)">
+          </div>
+          <div class="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-white p-0.5 border-2 border-yellow-400 shadow-xl overflow-hidden flex-shrink-0 animate-pulse-slow" style="animation-delay: 0.6s;">
+            <img id="preload-logo-3" src="" alt="Unit 4" class="w-full h-full object-cover rounded-full bg-slate-100" onerror="handlePreloadError(3)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Spinner -->
+      <div class="flex flex-col items-center space-y-2.5">
+        <div class="w-9 h-9 rounded-full border-3 border-yellow-400/30 border-t-yellow-400 animate-spin flex items-center justify-center"></div>
+        <p class="text-[11px] sm:text-xs tracking-widest uppercase font-bold text-slate-300">Live Updating via Gateway...</p>
+      </div>
+
+      <!-- Quotes -->
+      <div class="h-14 flex items-center justify-center px-4 w-full">
+        <p id="loading-quote" class="text-xs sm:text-sm font-medium italic text-blue-200 text-center transition-opacity duration-300">
+          "Champions keep playing until they get it right."
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Banner -->
+  <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex justify-between items-center gap-2">
+      <div class="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
+        <div class="p-2 sm:p-2.5 bg-yellow-400 text-blue-950 rounded-xl shadow-md flex-shrink-0">
+          <i class="fa-solid fa-trophy text-lg sm:text-2xl"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-xl md:text-2xl font-black tracking-wider uppercase truncate">UNIT IV MEET</h1>
+          <p class="text-[11px] sm:text-xs text-blue-200 font-medium truncate">Athletic Standings & Results Tracker</p>
+        </div>
+      </div>
+
+      <button onclick="loadData()" class="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 bg-blue-700/70 hover:bg-blue-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition border border-blue-500/40 active:scale-95">
+        <i id="refresh-icon" class="fa-solid fa-rotate text-xs"></i>
+        <span class="hidden sm:inline">Refresh Data</span>
+      </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-slate-200 shadow-xs overflow-x-auto touch-scroll">
+      <div class="max-w-7xl mx-auto px-2 sm:px-4 flex space-x-1 sm:space-x-2 whitespace-nowrap min-w-max">
+        <button id="tab-btn-1" onclick="switchTab(1)" class="tab-active px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+          <i class="fa-solid fa-medal text-xs sm:text-sm"></i>
+          <span>Placement & Tally</span>
+        </button>
+        <button id="tab-btn-2" onclick="switchTab(2)" class="text-slate-600 hover:text-blue-900 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition border-b-2 border-transparent">
+          <i class="fa-solid fa-person-running text-xs sm:text-sm"></i>
+          <span>Main Sports Events</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 flex-1 w-full space-y-6 sm:space-y-8">
+    <div id="content" class="hidden">
+      <!-- TAB 1: PLACEMENT & TALLY -->
+      <div id="view-tab-1" class="space-y-6 sm:space-y-10">
+        <!-- PODIUM -->
+        <section>
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+              <i class="fa-solid fa-crown text-yellow-500"></i> Top 3 Leaders
+            </h2>
+            <span class="text-[10px] sm:text-xs font-bold px-2.5 py-0.5 sm:py-1 bg-yellow-100 text-yellow-800 rounded-full uppercase tracking-wider">Podium</span>
+          </div>
+          <div id="podium-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-6 items-end"></div>
+        </section>
+
+        <!-- STANDINGS TABLE -->
+        <section class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-1 sm:gap-4">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-list-ol text-blue-600"></i> Delegation Standings
+              </h2>
+              <p class="text-[11px] sm:text-xs text-slate-500">Tap any row for medal breakdown. Tap logo to zoom.</p>
+            </div>
+            <span class="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-blue-900 bg-blue-100 px-2.5 py-0.5 rounded-full">Unit IV</span>
+          </div>
+          <div class="overflow-x-auto touch-scroll">
+            <table class="w-full text-left text-xs sm:text-sm" id="medalTable">
+              <thead class="bg-slate-100/75 text-slate-600 uppercase text-[10px] sm:text-xs font-bold border-b border-slate-200 whitespace-nowrap">
+                <tr>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5 text-center w-12 sm:w-16">Rank</th>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5">District / Delegation</th>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5 text-center font-bold text-yellow-600 bg-yellow-50/50">Gold 🥇</th>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5 text-center font-bold text-slate-500 bg-slate-100/50">Silver 🥈</th>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5 text-center font-bold text-amber-700 bg-amber-50/50">Bronze 🥉</th>
+                  <th class="px-3 sm:px-5 py-2.5 sm:py-3.5 text-center font-extrabold text-blue-900 bg-blue-50/50">Total</th>
+                </tr>
+              </thead>
+              <tbody id="table-body" class="divide-y divide-slate-100 font-medium whitespace-nowrap sm:whitespace-normal"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- GAMES STATUS TRACKER -->
+        <section class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-blue-950 text-white flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <div>
+              <h2 class="text-base sm:text-lg font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Games & Events Status Tracker
+              </h2>
+              <p class="text-[11px] sm:text-xs text-slate-300">Tap any sport to expand sub-categories and live plotting status.</p>
+            </div>
+            <div class="flex items-center gap-3 self-end sm:self-auto">
+              <div class="text-right">
+                <div id="progress-text" class="text-[11px] sm:text-xs font-bold text-slate-200">0 of 0 Completed</div>
+                <div id="progress-percentage" class="text-base sm:text-lg font-black text-emerald-400">0%</div>
+              </div>
+              <div class="w-24 sm:w-36 bg-slate-700 rounded-full h-2.5 sm:h-3 overflow-hidden p-0.5 border border-slate-600">
+                <div id="progress-bar-fill" class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+          <div id="games-accordion-container" class="divide-y divide-slate-200"></div>
+        </section>
+      </div>
+
+      <!-- TAB 2: MAIN SPORTS (A-Z) -->
+      <div id="view-tab-2" class="hidden space-y-4 sm:space-y-6">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-person-running text-blue-600"></i> Main Sports Events (A-Z)
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500">Tap on any sport below to inspect its medal breakdown and full sub-event results.</p>
+        </div>
+        <div id="events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-5"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <div id="eventModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-2.5 sm:p-4">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-blue-900 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="p-1.5 sm:p-2 bg-blue-800 rounded-lg flex-shrink-0 text-yellow-400">
+            <i class="fa-solid fa-award text-lg sm:text-xl"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="modalEventTitle" class="text-base sm:text-xl font-bold truncate">Event Name</h3>
+            <p id="modalEventSub" class="text-[11px] sm:text-xs text-blue-200 truncate">Total Medals Awarded</p>
+          </div>
+        </div>
+        <button onclick="closeModal('eventModal')" class="text-slate-300 hover:text-white text-lg sm:text-xl p-1.5 rounded-lg hover:bg-blue-800 transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 touch-scroll">
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600 mb-2 sm:mb-3 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-blue-600"></i> Event Medal Leaderboard</h4>
+          <div id="modalBreakdown" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"></div>
+        </div>
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600 mb-2 sm:mb-3 flex items-center gap-1.5"><i class="fa-solid fa-list-check text-blue-600"></i> Sub-events & Winners</h4>
+          <div class="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto touch-scroll">
+            <table class="w-full text-left text-xs sm:text-sm whitespace-nowrap sm:whitespace-normal">
+              <thead class="bg-slate-100 text-slate-600 text-[10px] sm:text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-3 sm:px-4 py-2 sm:py-3">Sub-Event</th>
+                  <th class="px-3 sm:px-4 py-2 sm:py-3">Category</th>
+                  <th class="px-3 sm:px-4 py-2 sm:py-3 text-yellow-700">Gold 🥇</th>
+                  <th class="px-3 sm:px-4 py-2 sm:py-3 text-slate-600">Silver 🥈</th>
+                  <th class="px-3 sm:px-4 py-2 sm:py-3 text-amber-800">Bronze 🥉</th>
+                </tr>
+              </thead>
+              <tbody id="modalSubEventsBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="bg-slate-50 px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-200 flex justify-end">
+        <button onclick="closeModal('eventModal')" class="px-4 sm:px-5 py-1.5 sm:py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs sm:text-sm rounded-lg transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="districtModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-2.5 sm:p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div id="districtModalHeader" class="bg-slate-900 text-white px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div id="districtModalLogo" class="flex-shrink-0"></div>
+          <div class="min-w-0">
+            <h3 id="districtModalName" class="text-base sm:text-xl font-bold truncate">District Name</h3>
+            <p id="districtModalRank" class="text-[11px] sm:text-xs text-slate-300 truncate">Medal Harvest & Achievements</p>
+          </div>
+        </div>
+        <button onclick="closeModal('districtModal')" class="text-slate-300 hover:text-white text-lg sm:text-xl p-1.5 rounded-lg hover:bg-slate-800 transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 touch-scroll">
+        <div class="grid grid-cols-4 gap-2 sm:gap-3 bg-slate-50 p-2.5 sm:p-4 rounded-xl border border-slate-200 text-center">
+          <div><div class="text-base sm:text-xl font-black text-amber-600" id="districtGold">0</div><div class="text-[9px] sm:text-[11px] uppercase font-bold text-slate-500">Gold 🥇</div></div>
+          <div><div class="text-base sm:text-xl font-black text-slate-600" id="districtSilver">0</div><div class="text-[9px] sm:text-[11px] uppercase font-bold text-slate-500">Silver 🥈</div></div>
+          <div><div class="text-base sm:text-xl font-black text-amber-800" id="districtBronze">0</div><div class="text-[9px] sm:text-[11px] uppercase font-bold text-slate-500">Bronze 🥉</div></div>
+          <div><div class="text-base sm:text-xl font-black text-blue-900" id="districtTotal">0</div><div class="text-[9px] sm:text-[11px] uppercase font-bold text-slate-500">Total</div></div>
+        </div>
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700 mb-2 sm:mb-3 flex items-center gap-1.5"><i class="fa-solid fa-award text-yellow-500"></i> Events Where Medals Were Won</h4>
+          <div id="districtEventsList" class="space-y-2.5 sm:space-y-3"></div>
+        </div>
+      </div>
+      <div class="bg-slate-50 px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-200 flex justify-end">
+        <button onclick="closeModal('districtModal')" class="px-4 sm:px-5 py-1.5 sm:py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs sm:text-sm rounded-lg transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="logoZoomModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="closeModal('logoZoomModal')">
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-2xl max-w-xs sm:max-w-sm w-full text-center relative border border-slate-200" onclick="event.stopPropagation()">
+      <button onclick="closeModal('logoZoomModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-800 text-lg p-1.5 rounded-full hover:bg-slate-100 transition"><i class="fa-solid fa-xmark"></i></button>
+      <div class="w-36 h-36 sm:w-48 sm:h-48 mx-auto rounded-2xl p-2 border-4 mb-3 sm:mb-4 flex items-center justify-center shadow-inner bg-slate-50" id="zoomedLogoContainer">
+        <img id="zoomedLogoImg" src="" alt="District Logo" class="w-full h-full object-contain rounded-xl">
+      </div>
+      <h3 id="zoomedDistrictName" class="text-base sm:text-lg font-black text-slate-800 uppercase tracking-wide">District Name</h3>
+      <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Official Unit IV Delegation Logo</p>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // Paste your 4 direct Google Drive links here for instant logo display
+    var PRELOADED_LOGOS = [
+      "PASTE_DISTRICT_1_GDRIVE_LINK_HERE",
+      "PASTE_DISTRICT_2_GDRIVE_LINK_HERE",
+      "PASTE_DISTRICT_3_GDRIVE_LINK_HERE",
+      "PASTE_DISTRICT_4_GDRIVE_LINK_HERE"
+    ];
+
+    var globalData = null;
+    var sportsQuotes = [
+      '"Champions keep playing until they get it right." — Billie Jean King',
+      '"Hard work beats talent when talent fails to work hard." — Tim Notke',
+      '"Sportsmanship: Win with humility, lose with grace, do both with dignity."',
+      '"Victory belongs to the most persevering." — Napoleon Bonaparte',
+      '"One District, One Goal, One Spirit — UNIT IV MEET."',
+      '"Play with heart, win with pride, lose with respect."',
+      '"Gold medals are made out of sweat, blood, tears, and effort every day."'
+    ];
+    var currentQuoteIndex = 0;
+    var quoteInterval = null;
+
+    function formatDriveThumb(url) {
+      if (!url || url.indexOf('PASTE_') !== -1) return '';
+      var idMatch = url.match(/[-\w]{25,}/);
+      if (idMatch && url.indexOf('drive.google.com') !== -1) {
+        return 'https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w500';
+      }
+      return url;
+    }
+
+    (function applyPreloadedLogos() {
+      for (var i = 0; i < PRELOADED_LOGOS.length; i++) {
+        var formatted = formatDriveThumb(PRELOADED_LOGOS[i]);
+        var imgEl = document.getElementById('preload-logo-' + i);
+        if (imgEl && formatted) {
+          imgEl.src = formatted;
+        } else if (imgEl) {
+          imgEl.src = 'https://ui-avatars.com/api/?name=Unit+' + (i + 1) + '&background=1e3a8a&color=fff&size=128';
+        }
+      }
+    })();
+
+    function handlePreloadError(idx) {
+      var img = document.getElementById('preload-logo-' + idx);
+      if (img) img.src = 'https://ui-avatars.com/api/?name=Unit+' + (idx + 1) + '&background=1e3a8a&color=fff&size=128';
+    }
+
+    window.onload = function() {
+      startQuoteRotation();
+      loadData();
+    };
+
+    function startQuoteRotation() {
+      var quoteEl = document.getElementById('loading-quote');
+      if (!quoteEl) return;
+      quoteInterval = setInterval(function() {
+        currentQuoteIndex = (currentQuoteIndex + 1) % sportsQuotes.length;
+        quoteEl.style.opacity = '0';
+        setTimeout(function() {
+          quoteEl.innerText = sportsQuotes[currentQuoteIndex];
+          quoteEl.style.opacity = '1';
+        }, 300);
+      }, 1800);
+    }
+
+    function stopQuoteRotation() {
+      if (quoteInterval) {
+        clearInterval(quoteInterval);
+        quoteInterval = null;
+      }
+    }
+
+    function switchTab(tabIndex) {
+      var btn1 = document.getElementById('tab-btn-1');
+      var btn2 = document.getElementById('tab-btn-2');
+      var view1 = document.getElementById('view-tab-1');
+      var view2 = document.getElementById('view-tab-2');
+
+      if (tabIndex === 1) {
+        btn1.className = "tab-active px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition";
+        btn2.className = "text-slate-600 hover:text-blue-900 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition border-b-2 border-transparent";
+        view1.classList.remove('hidden');
+        view2.classList.add('hidden');
+      } else {
+        btn2.className = "tab-active px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition";
+        btn1.className = "text-slate-600 hover:text-blue-900 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition border-b-2 border-transparent";
+        view2.classList.remove('hidden');
+        view1.classList.add('hidden');
+      }
+    }
+
+    // Live Gateway Fetch: Calls /api/gateway (which communicates with Google Apps Script)
+    function loadData() {
+      var loader = document.getElementById('app-loader');
+      if (loader) loader.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      document.getElementById('refresh-icon').classList.add('fa-spin');
+
+      fetch('/api/gateway')
+        .then(function(res) {
+          if (!res.ok) throw new Error('Network error: ' + res.status);
+          return res.json();
+        })
+        .then(function(data) {
+          if (data.error) throw new Error(data.error);
+          renderDashboard(data);
+        })
+        .catch(function(err) {
+          console.error(err);
+          alert('Could not update tally: ' + err.message);
+          dismissLoader();
+          document.getElementById('refresh-icon').classList.remove('fa-spin');
+        });
+    }
+
+    function dismissLoader() {
+      var loader = document.getElementById('app-loader');
+      if (loader) {
+        loader.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(function() {
+          loader.classList.add('hidden');
+          stopQuoteRotation();
+        }, 700);
+      }
+    }
+
+    function renderDashboard(data) {
+      globalData = data;
+      document.getElementById('refresh-icon').classList.remove('fa-spin');
+
+      renderPodium(data.rankings);
+      renderTable(data.rankings);
+      renderMainEventsAccordion(data.mainEvents, data.stats);
+      renderMainEvents(data.mainEvents);
+
+      document.getElementById('content').classList.remove('hidden');
+      setTimeout(dismissLoader, 400);
+    }
+
+    function getDelegationColor(name) {
+      if (globalData && globalData.delegationInfo && globalData.delegationInfo[name]) {
+        return globalData.delegationInfo[name].color || '#1e293b';
+      }
+      return '#1e293b';
+    }
+
+    function formatCategoryBadge(category) {
+      if (!category || category === '-') return '<span class="text-slate-400 font-medium">-</span>';
+      var catLower = String(category).toLowerCase();
+      var isBoys = catLower.indexOf('boy') !== -1;
+      var isGirls = catLower.indexOf('girl') !== -1;
+
+      if (isBoys && isGirls) {
+        return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200"><i class="fa-solid fa-venus-mars text-[9px]"></i> ' + category + '</span>';
+      } else if (isBoys) {
+        return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200"><i class="fa-solid fa-mars text-[9px]"></i> ' + category + '</span>';
+      } else if (isGirls) {
+        return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-pink-50 text-pink-600 border border-pink-200"><i class="fa-solid fa-venus text-[9px]"></i> ' + category + '</span>';
+      }
+      return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">' + category + '</span>';
+    }
+
+    function renderDelegationName(name, customClass) {
+      customClass = customClass || '';
+      var color = getDelegationColor(name);
+      return '<span class="inline-flex items-center gap-1.5 ' + customClass + '">' +
+               '<span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full flex-shrink-0" style="background-color: ' + color + ';"></span>' +
+               '<span style="color: ' + color + '; font-weight: 800;">' + name + '</span>' +
+             '</span>';
+    }
+
+    function getLogoHtml(logoUrl, name, sizeClass) {
+      sizeClass = sizeClass || 'w-10 h-10 sm:w-12 sm:h-12';
+      var color = getDelegationColor(name);
+      var safeName = String(name).replace(/'/g, "\\'");
+      var safeLogo = logoUrl ? String(logoUrl).replace(/'/g, "\\'") : '';
+
+      if (logoUrl) {
+        return '<div onclick="event.stopPropagation(); openLogoZoom(\'' + safeLogo + '\', \'' + safeName + '\', \'' + color + '\');" class="' + sizeClass + ' relative group cursor-zoom-in rounded-full flex-shrink-0" title="Click to zoom logo">' +
+                 '<img src="' + logoUrl + '" alt="' + name + '" class="w-full h-full object-cover rounded-full border-2 shadow-xs bg-white" style="border-color: ' + color + ';" onerror="this.onerror=null;this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=1e3a8a&color=fff\';">' +
+                 '<div class="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[10px]"><i class="fa-solid fa-magnifying-glass-plus"></i></div>' +
+               '</div>';
+      }
+      return '<div onclick="event.stopPropagation(); openLogoZoom(\'\', \'' + safeName + '\', \'' + color + '\');" class="' + sizeClass + ' cursor-zoom-in rounded-full text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs border border-slate-200 flex-shrink-0" style="background-color: ' + color + ';">' + String(name).substring(0, 2).toUpperCase() + '</div>';
+    }
+
+    function openLogoZoom(logoUrl, name, color) {
+      var img = document.getElementById('zoomedLogoImg');
+      var box = document.getElementById('zoomedLogoContainer');
+      var nameEl = document.getElementById('zoomedDistrictName');
+      box.style.borderColor = color || '#2563eb';
+      nameEl.innerText = name;
+      nameEl.style.color = color || '#1e293b';
+      img.src = logoUrl ? logoUrl : ('https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=1e3a8a&color=fff&size=256');
+      document.getElementById('logoZoomModal').classList.remove('hidden');
+    }
+
+    function openDistrictModal(districtName) {
+      if (!globalData || !globalData.delegationInfo[districtName]) return;
+      var d = globalData.delegationInfo[districtName];
+      document.getElementById('districtModalHeader').style.backgroundColor = d.color || '#0f172a';
+      document.getElementById('districtModalName').innerText = d.name;
+      document.getElementById('districtModalRank').innerText = 'Official Standing: Rank #' + (d.rank || '-') + ' in Unit IV Meet';
+      document.getElementById('districtModalLogo').innerHTML = getLogoHtml(d.logo, d.name, 'w-10 h-10 sm:w-12 sm:h-12');
+      document.getElementById('districtGold').innerText = d.gold;
+      document.getElementById('districtSilver').innerText = d.silver;
+      document.getElementById('districtBronze').innerText = d.bronze;
+      document.getElementById('districtTotal').innerText = d.total;
+
+      var container = document.getElementById('districtEventsList');
+      container.innerHTML = '';
+      var sportsWonMap = {};
+
+      globalData.allGames.forEach(function(game) {
+        var wonType = null;
+        if (game.goldWinner === districtName) wonType = 'Gold';
+        else if (game.silverWinner === districtName) wonType = 'Silver';
+        else if (game.bronzeWinner === districtName) wonType = 'Bronze';
+
+        if (wonType) {
+          if (!sportsWonMap[game.mainEvent]) sportsWonMap[game.mainEvent] = [];
+          sportsWonMap[game.mainEvent].push({ subEvent: game.subEvent, category: game.category, type: wonType });
+        }
+      });
+
+      var sportKeys = Object.keys(sportsWonMap).sort(function(a, b) { return a.localeCompare(b); });
+      if (sportKeys.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl text-xs sm:text-sm">No medals recorded yet for this delegation.</div>';
+      } else {
+        sportKeys.forEach(function(sport) {
+          var card = document.createElement('div');
+          card.className = "bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-2xs";
+          var listHtml = '';
+          sportsWonMap[sport].forEach(function(item) {
+            var badge = (item.type === 'Gold') ? '<span class="px-2 py-0.5 rounded text-[10px] sm:text-xs font-black bg-yellow-100 text-yellow-800 border border-yellow-300">Gold 🥇</span>' :
+                        (item.type === 'Silver') ? '<span class="px-2 py-0.5 rounded text-[10px] sm:text-xs font-black bg-slate-100 text-slate-700 border border-slate-300">Silver 🥈</span>' :
+                        '<span class="px-2 py-0.5 rounded text-[10px] sm:text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">Bronze 🥉</span>';
+            listHtml += '<li class="flex items-center justify-between py-1.5 text-xs border-b border-slate-100 last:border-0">' +
+                          '<span class="font-semibold text-slate-700 pr-2">' + item.subEvent + '</span>' +
+                          '<div class="flex items-center gap-1.5 flex-shrink-0">' + formatCategoryBadge(item.category) + badge + '</div>' +
+                        '</li>';
+          });
+          card.innerHTML = '<div class="font-extrabold text-xs sm:text-sm text-slate-800 pb-2 mb-2 border-b border-slate-100 flex items-center justify-between">' +
+                             '<span class="flex items-center gap-1.5"><i class="fa-solid fa-award text-amber-500"></i>' + sport + '</span>' +
+                             '<span class="text-[10px] sm:text-xs font-bold text-slate-500">' + sportsWonMap[sport].length + ' Medal(s)</span>' +
+                           '</div><ul class="divide-y divide-slate-100">' + listHtml + '</ul>';
+          container.appendChild(card);
+        });
+      }
+      document.getElementById('districtModal').classList.remove('hidden');
+    }
+
+    function renderPodium(rankings) {
+      var container = document.getElementById('podium-container');
+      container.innerHTML = '';
+      if (!rankings || rankings.length === 0) {
+        container.innerHTML = '<div class="col-span-3 text-center py-6 text-slate-500 text-xs sm:text-sm">No delegation data found.</div>';
+        return;
+      }
+      var podiumOrder = [
+        { data: rankings[1] || null, place: 2, label: '2nd Place', badgeBg: 'bg-slate-400', height: 'h-auto sm:h-64', order: 'order-2 sm:order-1' },
+        { data: rankings[0] || null, place: 1, label: '1st Champion', badgeBg: 'bg-yellow-500', height: 'h-auto sm:h-72', order: 'order-1 sm:order-2 ring-2 ring-yellow-400' },
+        { data: rankings[2] || null, place: 3, label: '3rd Place', badgeBg: 'bg-amber-600', height: 'h-auto sm:h-60', order: 'order-3 sm:order-3' }
+      ];
+
+      podiumOrder.forEach(function(item) {
+        if (!item.data) return;
+        var d = item.data;
+        var card = document.createElement('div');
+        card.className = 'bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between ' + item.height + ' ' + item.order + ' transition hover:-translate-y-1 cursor-pointer';
+        card.onclick = function() { openDistrictModal(d.name); };
+        card.innerHTML = '<div>' +
+                           '<div class="flex justify-between items-start">' +
+                             '<span class="px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold rounded-full text-white ' + item.badgeBg + ' flex items-center gap-1 shadow-sm"><i class="fa-solid fa-trophy text-[9px]"></i> ' + item.label + '</span>' +
+                             '<span class="text-xl sm:text-2xl font-black text-slate-300">#' + item.place + '</span>' +
+                           '</div>' +
+                           '<div class="flex items-center gap-3 my-3 sm:my-4">' +
+                             getLogoHtml(d.logo, d.name, 'w-12 h-12 sm:w-14 sm:h-14') +
+                             '<div class="min-w-0">' +
+                               '<h3 class="font-extrabold text-sm sm:text-base leading-tight hover:underline truncate" style="color: ' + d.color + ';">' + d.name + '</h3>' +
+                               '<p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Total Medals: <span class="font-bold text-slate-800">' + d.total + '</span></p>' +
+                             '</div>' +
+                           '</div>' +
+                         '</div>' +
+                         '<div class="grid grid-cols-3 gap-1.5 sm:gap-2 bg-slate-50 p-2 sm:p-2.5 rounded-xl text-center border border-slate-100 text-xs">' +
+                           '<div><div class="font-extrabold text-amber-600 text-sm sm:text-base">' + d.gold + '</div><div class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400">Gold</div></div>' +
+                           '<div><div class="font-extrabold text-slate-600 text-sm sm:text-base">' + d.silver + '</div><div class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400">Silver</div></div>' +
+                           '<div><div class="font-extrabold text-amber-800 text-sm sm:text-base">' + d.bronze + '</div><div class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400">Bronze</div></div>' +
+                         '</div>';
+        container.appendChild(card);
+      });
+    }
+
+    function renderTable(rankings) {
+      var tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      rankings.forEach(function(d) {
+        var tr = document.createElement('tr');
+        tr.className = 'hover:bg-blue-50/50 transition cursor-pointer';
+        tr.onclick = function() { openDistrictModal(d.name); };
+
+        var rankBadge = (d.rank === 1) ? '<span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-yellow-400 text-yellow-900 font-extrabold text-[11px] sm:text-xs shadow-sm">1</span>' :
+                        (d.rank === 2) ? '<span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-300 text-slate-800 font-extrabold text-[11px] sm:text-xs shadow-sm">2</span>' :
+                        (d.rank === 3) ? '<span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500 text-white font-extrabold text-[11px] sm:text-xs shadow-sm">3</span>' :
+                        '<span class="font-bold text-slate-600">' + d.rank + '</span>';
+
+        tr.innerHTML = '<td class="px-3 sm:px-5 py-3 sm:py-4 text-center">' + rankBadge + '</td>' +
+                       '<td class="px-3 sm:px-5 py-3 sm:py-4">' +
+                         '<div class="flex items-center gap-2.5 sm:gap-3">' +
+                           getLogoHtml(d.logo, d.name, 'w-7 h-7 sm:w-8 sm:h-8') +
+                           '<div><span class="font-bold text-xs sm:text-sm hover:underline" style="color: ' + d.color + ';">' + d.name + '</span></div>' +
+                         '</div>' +
+                       '</td>' +
+                       '<td class="px-3 sm:px-5 py-3 sm:py-4 text-center font-extrabold text-amber-600 bg-yellow-50/20">' + d.gold + '</td>' +
+                       '<td class="px-3 sm:px-5 py-3 sm:py-4 text-center font-extrabold text-slate-600 bg-slate-50/40">' + d.silver + '</td>' +
+                       '<td class="px-3 sm:px-5 py-3 sm:py-4 text-center font-extrabold text-amber-800 bg-amber-50/20">' + d.bronze + '</td>' +
+                       '<td class="px-3 sm:px-4 py-3 sm:py-4 text-center font-black text-blue-900 bg-blue-50/30 text-xs sm:text-base">' + d.total + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderMainEventsAccordion(mainEvents, stats) {
+      var percent = stats.totalGames > 0 ? Math.round((stats.completedGames / stats.totalGames) * 100) : 0;
+      document.getElementById('progress-text').innerText = stats.completedGames + ' of ' + stats.totalGames + ' Plotted';
+      document.getElementById('progress-percentage').innerText = percent + '%';
+      document.getElementById('progress-bar-fill').style.width = percent + '%';
+
+      var container = document.getElementById('games-accordion-container');
+      container.innerHTML = '';
+      var keys = Object.keys(mainEvents).sort(function(a, b) { return a.localeCompare(b); });
+
+      keys.forEach(function(eventName, idx) {
+        var ev = mainEvents[eventName];
+        var totalSubs = ev.subEvents.length;
+        var plottedSubs = ev.subEvents.filter(function(s) { return s.isPlotted; }).length;
+        var isAllDone = (plottedSubs === totalSubs && totalSubs > 0);
+
+        var row = document.createElement('div');
+        row.className = "bg-white";
+        var statusPill = isAllDone
+          ? '<span class="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check"></i> Done (' + plottedSubs + '/' + totalSubs + ')</span>'
+          : '<span class="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"><i class="fa-solid fa-clock"></i> Active (' + plottedSubs + '/' + totalSubs + ')</span>';
+
+        var subRowsHtml = '';
+        ev.subEvents.forEach(function(sub) {
+          var sBadge = sub.isPlotted
+            ? '<span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check"></i> Plotted</span>'
+            : '<span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-amber-600 bg-amber-50 px-1.5 sm:px-2 py-0.5 rounded border border-amber-200"><i class="fa-solid fa-hourglass-half"></i> Pending</span>';
+
+          subRowsHtml += '<tr class="hover:bg-slate-50/80 transition text-xs">' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5">' + sBadge + '</td>' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5 font-bold text-slate-800">' + sub.subEvent + '</td>' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5">' + formatCategoryBadge(sub.category) + '</td>' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5 bg-yellow-50/20">' + (sub.goldWinner ? renderDelegationName(sub.goldWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 italic">Pending</span>') + '</td>' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-50/40">' + (sub.silverWinner ? renderDelegationName(sub.silverWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 italic">-</span>') + '</td>' +
+                           '<td class="px-3 sm:px-4 py-2 sm:py-2.5 bg-amber-50/20">' + (sub.bronzeWinner ? renderDelegationName(sub.bronzeWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 italic">-</span>') + '</td>' +
+                         '</tr>';
+        });
+
+        row.innerHTML = '<div onclick="toggleAccordion(\'acc-' + idx + '\')" class="p-3.5 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition select-none">' +
+                          '<div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">' +
+                            '<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm"><i class="fa-solid fa-award text-base sm:text-lg"></i></div>' +
+                            '<div class="min-w-0">' +
+                              '<h3 class="font-extrabold text-sm sm:text-base text-slate-800 truncate">' + ev.name + '</h3>' +
+                              '<p class="text-[11px] sm:text-xs text-slate-500">' + totalSubs + ' Sub-category(s)</p>' +
+                            '</div>' +
+                          '</div>' +
+                          '<div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">' + statusPill + '<i id="acc-icon-acc-' + idx + '" class="fa-solid fa-chevron-down text-slate-400 text-xs sm:text-sm transition-transform duration-300"></i></div>' +
+                        '</div>' +
+                        '<div id="acc-' + idx + '" class="hidden border-t border-slate-100 bg-slate-50/50 p-2.5 sm:p-4">' +
+                          '<div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs overflow-x-auto touch-scroll">' +
+                            '<table class="w-full text-left whitespace-nowrap sm:whitespace-normal">' +
+                              '<thead class="bg-slate-100 text-slate-600 uppercase text-[10px] sm:text-[11px] font-bold border-b border-slate-200"><tr><th class="px-3 sm:px-4 py-2">Status</th><th class="px-3 sm:px-4 py-2">Sub-Category</th><th class="px-3 sm:px-4 py-2">Division</th><th class="px-3 sm:px-4 py-2 text-yellow-700">Gold 🥇</th><th class="px-3 sm:px-4 py-2 text-slate-600">Silver 🥈</th><th class="px-3 sm:px-4 py-2 text-amber-800">Bronze 🥉</th></tr></thead>' +
+                              '<tbody class="divide-y divide-slate-100">' + subRowsHtml + '</tbody>' +
+                            '</table>' +
+                          '</div>' +
+                        '</div>';
+        container.appendChild(row);
+      });
+    }
+
+    function toggleAccordion(id) {
+      var body = document.getElementById(id);
+      var icon = document.getElementById('acc-icon-' + id);
+      if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        body.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    function renderMainEvents(mainEvents) {
+      var container = document.getElementById('events-grid');
+      container.innerHTML = '';
+      var keys = Object.keys(mainEvents).sort(function(a, b) { return a.localeCompare(b); });
+
+      keys.forEach(function(eventName) {
+        var ev = mainEvents[eventName];
+        var card = document.createElement('div');
+        card.className = "bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer hover:border-blue-500 group flex flex-col justify-between";
+        card.onclick = function() { openEventModal(eventName); };
+        card.innerHTML = '<div>' +
+                           '<div class="flex justify-between items-start mb-3">' +
+                             '<span class="p-2 sm:p-2.5 rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition"><i class="fa-solid fa-award text-lg sm:text-xl"></i></span>' +
+                             '<span class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">' + ev.subEvents.length + ' Sub-event(s)</span>' +
+                           '</div>' +
+                           '<h3 class="font-extrabold text-base sm:text-lg text-slate-800 group-hover:text-blue-600 transition mb-1">' + ev.name + '</h3>' +
+                           '<p class="text-[11px] sm:text-xs text-slate-500 mb-3 sm:mb-4">Tap to inspect breakdown</p>' +
+                         '</div>' +
+                         '<div class="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-slate-100 text-xs">' +
+                           '<span class="text-slate-500 font-medium text-[11px] sm:text-xs">Total Medals:</span>' +
+                           '<span class="font-black text-blue-900 text-xs sm:text-sm bg-blue-50 px-2 py-0.5 rounded-md">' + ev.totalMedals + '</span>' +
+                         '</div>';
+        container.appendChild(card);
+      });
+    }
+
+    function openEventModal(eventName) {
+      if (!globalData || !globalData.mainEvents[eventName]) return;
+      var ev = globalData.mainEvents[eventName];
+      document.getElementById('modalEventTitle').innerText = ev.name;
+      document.getElementById('modalEventSub').innerText = ev.totalMedals + ' Total Medals Awarded Across ' + ev.subEvents.length + ' Sub-events';
+
+      var breakdownContainer = document.getElementById('modalBreakdown');
+      breakdownContainer.innerHTML = '';
+      var delegationsInEvent = Object.keys(ev.delegationMedals).map(function(name) {
+        return { name: name, gold: ev.delegationMedals[name].gold, silver: ev.delegationMedals[name].silver, bronze: ev.delegationMedals[name].bronze, total: ev.delegationMedals[name].total, info: globalData.delegationInfo[name] };
+      });
+      delegationsInEvent.sort(function(a, b) {
+        if (b.gold !== a.gold) return b.gold - a.gold;
+        if (b.silver !== a.silver) return b.silver - a.silver;
+        return b.bronze - a.bronze;
+      });
+
+      if (delegationsInEvent.length === 0) {
+        breakdownContainer.innerHTML = '<p class="text-xs text-slate-400 col-span-4">No medals plotted yet in this event.</p>';
+      } else {
+        delegationsInEvent.forEach(function(d) {
+          var color = getDelegationColor(d.name);
+          var card = document.createElement('div');
+          card.className = "bg-slate-50 border border-slate-200 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between";
+          card.innerHTML = '<div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">' +
+                             getLogoHtml(d.info ? d.info.logo : '', d.name, 'w-5 h-5 sm:w-6 sm:h-6') +
+                             '<span class="text-[11px] sm:text-xs font-extrabold truncate" style="color: ' + color + ';" title="' + d.name + '">' + d.name + '</span>' +
+                           '</div>' +
+                           '<div class="flex justify-between items-center text-[11px] sm:text-xs font-bold">' +
+                             '<span class="text-amber-600">' + d.gold + 'G</span><span class="text-slate-500">' + d.silver + 'S</span><span class="text-amber-800">' + d.bronze + 'B</span>' +
+                             '<span class="text-blue-900 bg-white px-1 sm:px-1.5 py-0.5 rounded border border-slate-200">' + d.total + '</span>' +
+                           '</div>';
+          breakdownContainer.appendChild(card);
+        });
+      }
+
+      var subTbody = document.getElementById('modalSubEventsBody');
+      subTbody.innerHTML = '';
+      ev.subEvents.forEach(function(sub) {
+        var row = document.createElement('tr');
+        row.className = "hover:bg-slate-50/80 transition text-xs";
+        row.innerHTML = '<td class="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-slate-800">' + sub.subEvent + '</td>' +
+                        '<td class="px-3 sm:px-4 py-2 sm:py-3">' + formatCategoryBadge(sub.category) + '</td>' +
+                        '<td class="px-3 sm:px-4 py-2 sm:py-3 bg-yellow-50/20">' + (sub.goldWinner && sub.goldWinner !== 'TBD' ? renderDelegationName(sub.goldWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 text-[11px] sm:text-xs">TBD</span>') + '</td>' +
+                        '<td class="px-3 sm:px-4 py-2 sm:py-3 bg-slate-50/40">' + (sub.silverWinner && sub.silverWinner !== 'TBD' ? renderDelegationName(sub.silverWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 text-[11px] sm:text-xs">TBD</span>') + '</td>' +
+                        '<td class="px-3 sm:px-4 py-2 sm:py-3 bg-amber-50/20">' + (sub.bronzeWinner && sub.bronzeWinner !== 'TBD' ? renderDelegationName(sub.bronzeWinner, 'text-[11px] sm:text-xs') : '<span class="text-slate-400 text-[11px] sm:text-xs">TBD</span>') + '</td>';
+        subTbody.appendChild(row);
+      });
+      document.getElementById('eventModal').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal('eventModal');
+        closeModal('districtModal');
+        closeModal('logoZoomModal');
+      }
+    });
+  </script>
+</body>
+</html>
